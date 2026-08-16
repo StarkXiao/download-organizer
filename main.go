@@ -155,7 +155,10 @@ func findDuplicates(items []*Item) {
 			continue
 		}
 		h := sha256.New()
-		_, err = io.Copy(h, f)
+		_, err = io.CopyN(h, f, 4096)
+		if err == io.EOF {
+			err = nil
+		}
 		f.Close()
 		if err != nil {
 			continue
