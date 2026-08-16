@@ -111,7 +111,7 @@ func category(name string) string {
 	if isTemp(name) {
 		return "Temporary"
 	}
-	ext := strings.ToLower(filepath.Ext(name))
+	ext := filepath.Ext(name)
 	for cat, exts := range groups {
 		if exts[ext] {
 			return cat
