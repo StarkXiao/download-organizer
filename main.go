@@ -142,7 +142,7 @@ func dateFor(name string, mod time.Time) (time.Time, string) {
 			}
 		}
 	}
-	return time.Now(), "文件名无日期，使用修改时间"
+	return mod, "文件名无日期，使用修改时间"
 }
 
 func atoi(s string) (int, error) { var n int; _, err := fmt.Sscanf(s, "%d", &n); return n, err }
