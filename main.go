@@ -111,13 +111,18 @@ func category(name string) string {
 	if isTemp(name) {
 		return "Temporary"
 	}
-	ext := strings.ToLower(filepath.Ext(name))
+	ext := normalizedExtension(name)
 	for cat, exts := range groups {
 		if exts[ext] {
 			return cat
 		}
 	}
 	return "Other"
+}
+
+// normalizedExtension gives category lookups a case-insensitive extension.
+func normalizedExtension(name string) string {
+	return strings.ToLower(filepath.Ext(name))
 }
 
 func isTemp(name string) bool {

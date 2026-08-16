@@ -30,6 +30,25 @@ func TestTempRulesDoNotTreatHiddenConfigAsTemp(t *testing.T) {
 	}
 }
 
+func TestCategoryTreatsExtensionsCaseInsensitively(t *testing.T) {
+	tests := []struct {
+		name string
+		want string
+	}{
+		{name: "report.PDF", want: "Documents"},
+		{name: "photo.JPG", want: "Images"},
+		{name: "archive.ZIP", want: "Archives"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := category(tt.name); got != tt.want {
+				t.Errorf("category(%q) = %q, want %q", tt.name, got, tt.want)
+			}
+		})
+	}
+}
+
 func TestScanAndDuplicateDetection(t *testing.T) {
 	dir := t.TempDir()
 	first := filepath.Join(dir, "report-2024-05-20.txt")
