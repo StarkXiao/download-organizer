@@ -96,7 +96,7 @@ func scan(root string, cleanupAge time.Duration) ([]*Item, error) {
 		cat := category(name)
 		date, dateReason := dateFor(name, info.ModTime())
 		target := filepath.Join(root, cat, date.Format("2006-01"), name)
-		cleanup := isTemp(name) && time.Since(info.ModTime()) >= cleanupAge
+		cleanup := isTemp(name)
 		reason := fmt.Sprintf("扩展名归类为 %s；%s", cat, dateReason)
 		if cleanup {
 			reason += "；临时文件且已超过清理期限"
