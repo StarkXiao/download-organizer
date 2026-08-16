@@ -195,17 +195,27 @@ func writeCSV(path string, items []*Item) error {
 	if err != nil {
 		return err
 	}
-	defer f.Close()
+	// csv.Writer buffers internally; Flush must run before the file is
+	// closed, otherwise buffered records never reach disk and the exported
+	// file is empty or truncated. Close the file explicitly after a
+	// successful flush so we can surface a close error as a real failure.
 	w := csv.NewWriter(f)
 	if err = w.Write([]string{"name", "path", "category", "target", "reason", "size", "modified", "duplicate_of", "cleanup"}); err != nil {
+		f.Close()
 		return err
 	}
 	for _, it := range items {
 		if err = w.Write([]string{it.Name, it.Path, it.Category, it.Target, it.Reason, fmt.Sprint(it.Size), it.Modified.Format(time.RFC3339), it.DuplicateOf, fmt.Sprint(it.Cleanup)}); err != nil {
+			f.Close()
 			return err
 		}
 	}
-	return w.Error()
+	w.Flush()
+	if err = w.Error(); err != nil {
+		f.Close()
+		return err
+	}
+	return f.Close()
 }
 
 func applyChanges(root string, items []*Item) error {
