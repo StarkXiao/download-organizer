@@ -1,0 +1,11 @@
+# Build artifacts
+download-organizer
+dist/
+
+# Reports generated during local runs
+*.csv
+
+# IDE and OS files
+.DS_Store
+.idea/
+.vscode/
