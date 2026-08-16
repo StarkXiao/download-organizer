@@ -205,7 +205,6 @@ func writeCSV(path string, items []*Item) error {
 			return err
 		}
 	}
-	w.Flush()
 	return w.Error()
 }
 
