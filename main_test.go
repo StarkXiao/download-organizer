@@ -30,6 +30,45 @@ func TestTempRulesDoNotTreatHiddenConfigAsTemp(t *testing.T) {
 	}
 }
 
+func TestTempCleanupRespectsAge(t *testing.T) {
+	dir := t.TempDir()
+
+	// 新临时文件：修改时间为当前，未超过清理期限，不应列为可清理。
+	freshPath := filepath.Join(dir, "downloading.part")
+	if err := os.WriteFile(freshPath, []byte("partial"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Chtimes(freshPath, time.Now(), time.Now()); err != nil {
+		t.Fatal(err)
+	}
+
+	// 旧临时文件：修改时间早于清理期限，应列为可清理。
+	stalePath := filepath.Join(dir, "old.cache.tmp")
+	if err := os.WriteFile(stalePath, []byte("stale"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	stale := time.Now().Add(-48 * time.Hour)
+	if err := os.Chtimes(stalePath, stale, stale); err != nil {
+		t.Fatal(err)
+	}
+
+	items, err := scan(dir, 24*time.Hour)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	cleanup := map[string]bool{}
+	for _, it := range items {
+		cleanup[it.Name] = it.Cleanup
+	}
+	if cleanup["downloading.part"] {
+		t.Error("fresh temp file must not be flagged as safe to clean up")
+	}
+	if !cleanup["old.cache.tmp"] {
+		t.Error("stale temp file past --cleanup-age must be flagged as safe to clean up")
+	}
+}
+
 func TestScanAndDuplicateDetection(t *testing.T) {
 	dir := t.TempDir()
 	first := filepath.Join(dir, "report-2024-05-20.txt")
